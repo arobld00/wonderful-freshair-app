@@ -2,6 +2,7 @@ package com.wonderful.freshair.domain
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import com.wonderful.freshair.infrastructure.City
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -38,8 +39,19 @@ class CityAirQualityServiceTest {
         whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(cityGeocoded)
         whenever(airQualityForecastService.getAirQualityForecast(coordinates)).thenReturn(airQualityForecasts)
 
-        val airQualityIndex: AirQualityIndex = cityAirQualityService.averageIndex(city)
+        val airQualityIndex = cityAirQualityService.averageIndex(city)
 
-        assertThat(airQualityIndex.index).isEqualTo(expectedAverageAitQualityIndex)
+        assertThat(airQualityIndex?.index).isEqualTo(expectedAverageAitQualityIndex)
+    }
+
+    @Test
+    fun `should return null if city doesnt exits`() {
+        val cityName = "Barcelona"
+        val countryCode = "ES"
+        val city = City(cityName, countryCode)
+        whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(null)
+
+        assertThat(cityAirQualityService.averageIndex(city)).isNull()
+
     }
 }

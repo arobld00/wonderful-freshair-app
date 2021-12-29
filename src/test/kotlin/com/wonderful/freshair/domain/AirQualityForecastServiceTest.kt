@@ -2,6 +2,7 @@ package com.wonderful.freshair.domain
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
+import assertk.assertions.isNull
 import com.wonderful.freshair.infrastructure.api.OWMAirQualityForecastService
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -55,9 +56,27 @@ class AirQualityForecastServiceTest {
                 )
         )
 
-        val airQualityForecasts: List<AirQualityForecast> =
-            airQualityForecastService.getAirQualityForecast(GeoCoordinates(lat, lon))
+        val airQualityForecasts = airQualityForecastService.getAirQualityForecast(GeoCoordinates(lat, lon))
 
         assertThat(airQualityForecasts).isEqualTo(expectedAirQualityForecasts)
+    }
+
+    @Test
+    fun `should return null if pollution data is empty`() {
+        val lat = 41.3888
+        val lon = 2.159
+        WireMock.stubFor(
+            WireMock.get("/data/2.5/air_pollution/forecast?lat=$lat&lon=$lon&appid=$apiKey")
+                .willReturn(
+                    WireMock.aResponse()
+                        .withBodyFile("barcelona-airpollution-empty.json")
+                        .withTransformerParameter("lat", lat)
+                        .withTransformerParameter("lon", lon)
+                )
+        )
+
+        val airQualityForecasts = airQualityForecastService.getAirQualityForecast(GeoCoordinates(lat, lon))
+
+        assertThat(airQualityForecasts).isNull()
     }
 }

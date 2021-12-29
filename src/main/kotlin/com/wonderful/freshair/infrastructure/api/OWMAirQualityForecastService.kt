@@ -26,7 +26,7 @@ class OWMAirQualityForecastService(
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
     }
 
-    override fun getAirQualityForecast(coordinates: GeoCoordinates): List<AirQualityForecast> {
+    override fun getAirQualityForecast(coordinates: GeoCoordinates): List<AirQualityForecast>? {
         val request = HttpRequest.newBuilder()
             .uri(URL(
                 baseUrl,
@@ -43,6 +43,7 @@ class OWMAirQualityForecastService(
         return airQualityForecasts
             .list
             .map { AirQualityForecast(it.main.aqi) }
+            .ifEmpty { null }
     }
 
 }

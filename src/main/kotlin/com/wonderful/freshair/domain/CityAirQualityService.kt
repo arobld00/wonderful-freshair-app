@@ -13,9 +13,9 @@ class CityAirQualityService(
   private val cityGeocodingService: CityGeoCodingService,
   private val airQualityForecastService: AirQualityForecastService
 ) {
-    fun averageIndex(city: City): AirQualityIndex {
-        val (name, _, coordinates) = cityGeocodingService.getGeoCoordinates(city)
-        val airQualityForecasts = airQualityForecastService.getAirQualityForecast(coordinates)
+    fun averageIndex(city: City): AirQualityIndex? {
+        val (name, _, coordinates) = cityGeocodingService.getGeoCoordinates(city) ?: return null
+        val airQualityForecasts = airQualityForecastService.getAirQualityForecast(coordinates) ?: return null
 
         return AirQualityIndex(name, airQualityForecasts
             .map { it.index }

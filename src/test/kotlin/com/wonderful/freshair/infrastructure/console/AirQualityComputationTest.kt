@@ -1,6 +1,7 @@
 package com.wonderful.freshair.infrastructure.console
 
 import assertk.assertThat
+import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import com.wonderful.freshair.domain.AirQualityIndex
 import com.wonderful.freshair.domain.CityAirQualityService
@@ -49,5 +50,17 @@ class AirQualityComputationTest {
 
         assertThat(outputStreamCaptor.toString().trim())
             .isEqualTo("$city average air quality index forecast is $expectedIndex")
+    }
+
+    @Test
+    fun `should omit output when no data`() {
+        val city = "Barcelon"
+        val country = "ES"
+        val cities = listOf("$city,$country")
+        whenever(cityAirQualityService.averageIndex(City(city, country))).thenReturn(null)
+
+        airQualityComputation.compute(cities)
+
+        assertThat(outputStreamCaptor.toString().trim()).isEmpty()
     }
 }

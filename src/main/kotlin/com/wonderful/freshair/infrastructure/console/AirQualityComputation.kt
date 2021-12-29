@@ -9,7 +9,7 @@ class AirQualityComputation(
     fun compute(cities: List<String>) {
         cities
             .map { City.fromParameter(it) }
-            .map { cityAirQualityService.averageIndex(it) }
+            .mapNotNull { cityAirQualityService.averageIndex(it) }
             .forEach { println("${it.cityName} average air quality index forecast is ${it.index}") }
     }
 }
