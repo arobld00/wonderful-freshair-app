@@ -1,10 +1,10 @@
 package com.wonderful.freshair.domain
 
+import arrow.core.None
+import arrow.core.orElse
 import assertk.assertAll
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isNull
-import assertk.assertions.prop
 import com.wonderful.freshair.infrastructure.City
 import com.wonderful.freshair.infrastructure.api.OWMCityGeoCodingService
 import com.github.tomakehurst.wiremock.WireMockServer
@@ -16,6 +16,7 @@ import com.github.tomakehurst.wiremock.client.WireMock.stubFor
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.options
 import com.github.tomakehurst.wiremock.extension.responsetemplating.ResponseTemplateTransformer
+import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -60,13 +61,14 @@ class CityGeoCodingServiceTest {
             )
         )
 
-        val geoCodedCity = cityGeoCodingService.getGeoCoordinates(city)
-
-        assertAll {
-            assertThat(geoCodedCity).prop(CityGeoCoded::name).isEqualTo(cityName)
-            assertThat(geoCodedCity).prop(CityGeoCoded::countryCode).isEqualTo(cityCountry)
-            assertThat(geoCodedCity).prop(CityGeoCoded::coordinates).isEqualTo(GeoCoordinates(lat, lon))
-        }
+        cityGeoCodingService.getGeoCoordinates(city)
+            .map {
+                assertAll {
+                    assertThat(it.name).isEqualTo(cityName)
+                    assertThat(it.countryCode).isEqualTo(cityCountry)
+                    assertThat(it.coordinates).isEqualTo(GeoCoordinates(lat, lon))
+                }
+            }.orElse { fail("Should no be None.") }
     }
 
     @Test
@@ -85,7 +87,7 @@ class CityGeoCodingServiceTest {
         val geoCodedCity = cityGeoCodingService.getGeoCoordinates(city)
 
         assertAll {
-            assertThat(geoCodedCity).isNull()
+            assertThat(geoCodedCity).isEqualTo(None)
         }
     }
 }

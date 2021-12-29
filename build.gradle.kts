@@ -13,7 +13,12 @@ repositories {
 	mavenCentral()
 }
 
+val arrowVersion = "1.0.1"
+
 dependencies {
+    // Arrow
+    implementation("io.arrow-kt:arrow-core:$arrowVersion")
+
 	// JSON
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.12.3")
 

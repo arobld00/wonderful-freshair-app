@@ -1,5 +1,7 @@
 package com.wonderful.freshair.infrastructure.console
 
+import arrow.core.None
+import arrow.core.Some
 import assertk.assertThat
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
@@ -15,7 +17,6 @@ import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.math.BigDecimal
 import java.math.RoundingMode
-
 
 class AirQualityComputationTest {
 
@@ -44,7 +45,7 @@ class AirQualityComputationTest {
         val cities = listOf("$city,$country")
         val index = 1.50
         val expectedIndex = BigDecimal(index).setScale(2, RoundingMode.HALF_UP)
-        whenever(cityAirQualityService.averageIndex(City(city, country))).thenReturn(AirQualityIndex(city, index))
+        whenever(cityAirQualityService.averageIndex(City(city, country))).thenReturn(Some(AirQualityIndex(city, index)))
 
         airQualityComputation.compute(cities)
 
@@ -57,7 +58,7 @@ class AirQualityComputationTest {
         val city = "Barcelon"
         val country = "ES"
         val cities = listOf("$city,$country")
-        whenever(cityAirQualityService.averageIndex(City(city, country))).thenReturn(null)
+        whenever(cityAirQualityService.averageIndex(City(city, country))).thenReturn(None)
 
         airQualityComputation.compute(cities)
 

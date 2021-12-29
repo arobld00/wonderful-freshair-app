@@ -1,8 +1,9 @@
 package com.wonderful.freshair.domain
 
+import arrow.core.None
+import arrow.core.Some
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isNull
 import com.wonderful.freshair.infrastructure.api.OWMAirQualityForecastService
 import com.github.tomakehurst.wiremock.WireMockServer
 import com.github.tomakehurst.wiremock.client.WireMock
@@ -58,7 +59,7 @@ class AirQualityForecastServiceTest {
 
         val airQualityForecasts = airQualityForecastService.getAirQualityForecast(GeoCoordinates(lat, lon))
 
-        assertThat(airQualityForecasts).isEqualTo(expectedAirQualityForecasts)
+        assertThat(airQualityForecasts).isEqualTo(Some(expectedAirQualityForecasts))
     }
 
     @Test
@@ -77,6 +78,6 @@ class AirQualityForecastServiceTest {
 
         val airQualityForecasts = airQualityForecastService.getAirQualityForecast(GeoCoordinates(lat, lon))
 
-        assertThat(airQualityForecasts).isNull()
+        assertThat(airQualityForecasts).isEqualTo(None)
     }
 }

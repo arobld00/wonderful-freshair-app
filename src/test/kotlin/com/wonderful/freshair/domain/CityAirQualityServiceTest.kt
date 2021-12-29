@@ -2,14 +2,13 @@ package com.wonderful.freshair.domain
 
 import assertk.assertThat
 import assertk.assertions.isEqualTo
-import assertk.assertions.isNull
+import arrow.core.Some
+import arrow.core.None
 import com.wonderful.freshair.infrastructure.City
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 class CityAirQualityServiceTest {
 
@@ -35,23 +34,35 @@ class CityAirQualityServiceTest {
             AirQualityForecast(2),
             AirQualityForecast(1)
         )
-        val expectedAverageAitQualityIndex = BigDecimal(1.50).setScale(2, RoundingMode.HALF_UP)
-        whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(cityGeocoded)
-        whenever(airQualityForecastService.getAirQualityForecast(coordinates)).thenReturn(airQualityForecasts)
+        whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(Some(cityGeocoded))
+        whenever(airQualityForecastService.getAirQualityForecast(coordinates)).thenReturn(Some(airQualityForecasts))
 
         val airQualityIndex = cityAirQualityService.averageIndex(city)
 
-        assertThat(airQualityIndex?.index).isEqualTo(expectedAverageAitQualityIndex)
+        assertThat(airQualityIndex).isEqualTo(Some(AirQualityIndex(cityName, 1.5)))
     }
 
     @Test
-    fun `should return null if city doesnt exits`() {
+    fun `should return none if city doesnt exist`() {
         val cityName = "Barcelona"
         val countryCode = "ES"
         val city = City(cityName, countryCode)
-        whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(null)
+        whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(None)
 
-        assertThat(cityAirQualityService.averageIndex(city)).isNull()
+        assertThat(cityAirQualityService.averageIndex(city)).isEqualTo(None)
+    }
 
+    @Test
+    fun `should return none if air quality data is empty`() {
+        val cityName = "Barcelona"
+        val countryCode = "ES"
+        val city = City(cityName, countryCode)
+        val coordinates = GeoCoordinates(41.0, 2.0)
+        val cityGeoCoded = CityGeoCoded(cityName, countryCode, coordinates)
+        whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(Some(cityGeoCoded))
+        whenever(airQualityForecastService.getAirQualityForecast(coordinates)).thenReturn(None)
+
+
+        assertThat(cityAirQualityService.averageIndex(city)).isEqualTo(None)
     }
 }
