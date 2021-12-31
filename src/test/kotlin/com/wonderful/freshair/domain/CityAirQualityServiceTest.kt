@@ -4,6 +4,8 @@ import assertk.assertThat
 import assertk.assertions.isEqualTo
 import arrow.core.Some
 import arrow.core.None
+import arrow.core.left
+import arrow.core.right
 import com.wonderful.freshair.infrastructure.City
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -39,21 +41,21 @@ class CityAirQualityServiceTest {
 
         val airQualityIndex = cityAirQualityService.averageIndex(city)
 
-        assertThat(airQualityIndex).isEqualTo(Some(AirQualityIndex(cityName, 1.5)))
+        assertThat(airQualityIndex).isEqualTo(AirQualityIndex(cityName, 1.5).right())
     }
 
     @Test
-    fun `should return none if city doesnt exist`() {
+    fun `should return left if city doesnt exist`() {
         val cityName = "Barcelona"
         val countryCode = "ES"
         val city = City(cityName, countryCode)
         whenever(cityGeocodingService.getGeoCoordinates(city)).thenReturn(None)
 
-        assertThat(cityAirQualityService.averageIndex(city)).isEqualTo(None)
+        assertThat(cityAirQualityService.averageIndex(city)).isEqualTo(ApplicationError.left())
     }
 
     @Test
-    fun `should return none if air quality data is empty`() {
+    fun `should return left if air quality data is empty`() {
         val cityName = "Barcelona"
         val countryCode = "ES"
         val city = City(cityName, countryCode)
@@ -63,6 +65,6 @@ class CityAirQualityServiceTest {
         whenever(airQualityForecastService.getAirQualityForecast(coordinates)).thenReturn(None)
 
 
-        assertThat(cityAirQualityService.averageIndex(city)).isEqualTo(None)
+        assertThat(cityAirQualityService.averageIndex(city)).isEqualTo(ApplicationError.left())
     }
 }
